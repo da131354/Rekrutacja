@@ -12,7 +12,7 @@ class Kandydat extends Model
 
     protected $fillable = [
     'imie', 'nazwisko', 'pesel', 'email', 'telefon',
-    'adres', 'data_urodzenia', 'plec', 'szkola_srednia', 'srednia_ocen', 'zdjecie'
+    'adres', 'data_urodzenia', 'plec', 'szkola_srednia', 'srednia_ocen', 'zdjecie', 'user_id'
 ];
 
     protected $casts = [
@@ -50,4 +50,10 @@ public function hasCustomImage()
 {
     return $this->zdjecie && \Storage::disk('public')->exists($this->zdjecie);
 }
+
+public function user()
+{
+    return $this->belongsTo(\App\Models\User::class);
+}
+
 }

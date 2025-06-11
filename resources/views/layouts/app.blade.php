@@ -60,12 +60,36 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="navbar-text">
-                            <i class="fas fa-user me-1"></i>
-                            Administrator
-                        </span>
-                    </li>
+                    @auth
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+                               data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>
+                                {{ Auth::user()->name }} 
+                                @if(Auth::user()->isAdmin())
+                                    <span class="badge bg-danger">Admin</span>
+                                @else
+                                    <span class="badge bg-info">Kandydat</span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Wyloguj
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Zaloguj się
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -83,27 +107,57 @@
                             Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('kandydats.*') ? 'active' : '' }}" 
-                           href="{{ route('kandydats.index') }}">
-                            <i class="fas fa-users me-2"></i>
-                            Kandydaci
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('kandydaturas.*') ? 'active' : '' }}" 
-                           href="{{ route('kandydaturas.index') }}">
-                            <i class="fas fa-file-alt me-2"></i>
-                            Kandydatury
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('kieruneks.*') ? 'active' : '' }}" 
-                           href="{{ route('kieruneks.index') }}">
-                            <i class="fas fa-book me-2"></i>
-                            Kierunki
-                        </a>
-                    </li>
+                    
+                    @auth
+                        @if(Auth::user()->isAdmin())
+                            <!-- Menu dla Admina -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kandydats.*') ? 'active' : '' }}" 
+                                   href="{{ route('kandydats.index') }}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Kandydaci
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kandydaturas.index') ? 'active' : '' }}" 
+                                   href="{{ route('kandydaturas.index') }}">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    Wszystkie Kandydatury
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kieruneks.*') ? 'active' : '' }}" 
+                                   href="{{ route('kieruneks.index') }}">
+                                    <i class="fas fa-book me-2"></i>
+                                    Kierunki
+                                </a>
+                            </li>
+                        @else
+                            <!-- Menu dla Kandydata -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kieruneks.index') ? 'active' : '' }}" 
+                                   href="{{ route('kieruneks.index') }}">
+                                    <i class="fas fa-book me-2"></i>
+                                    Dostępne Kierunki
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('kandydaturas.my') ? 'active' : '' }}" 
+                                   href="{{ route('kandydaturas.my') }}">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    Moje Kandydatury
+                                </a>
+                            </li>
+                        @endif
+                    @else
+                        <!-- Menu dla niezalogowanych -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Zaloguj się
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </nav>
 
@@ -171,12 +225,14 @@
             });
         }, 5000);
 
-        // CSRF Token for AJAX requests
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+        // CSRF Token for AJAX requests (sprawdź czy jQuery jest załadowane)
+        if (typeof $ !== 'undefined') {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+        }
 
         // Form validation enhancement
         (function() {

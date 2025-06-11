@@ -7,6 +7,8 @@ use App\Models\Kandydat;
 use App\Models\Kierunek;
 use App\Http\Requests\StoreKandydaturaRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class KandydaturaController extends Controller
 {
@@ -106,4 +108,29 @@ class KandydaturaController extends Controller
             return back()->with('error', 'Nie można usunąć kandydatury.');
         }
     }
+
+    public function myApplications()
+{
+    try {
+        // Sprawdź czy użytkownik ma powiązanego kandydata
+        $kandydat = Auth::user()->kandydat;
+        
+        if (!$kandydat) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Nie masz jeszcze profilu kandydata. Skontaktuj się z administratorem.');
+        }
+        
+        // Pobierz kandydatury tego kandydata
+        $kandydaturas = Kandydatura::with(['kierunek'])
+            ->where('kandydat_id', $kandydat->id)
+            ->orderBy('data_zlozenia', 'desc')
+            ->paginate(10);
+            
+        $kieruneks = Kierunek::where('aktywny', true)->get();
+        
+        return view('kandydaturas.my', compact('kandydaturas', 'kieruneks', 'kandydat'));
+    } catch (\Exception $e) {
+        return back()->with('error', 'Wystąpił błąd podczas pobierania kandydatur.');
+    }
+}
 }

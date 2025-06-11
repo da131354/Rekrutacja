@@ -9,9 +9,11 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            KierunekSeeder::class,
+            UserSeeder::class,
             KandydatSeeder::class,
+            KierunekSeeder::class,
             KandydaturaSeeder::class,
+            LinkUsersWithKandydatsSeeder::class,
         ]);
     }
 }
